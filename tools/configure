@@ -137,7 +137,7 @@ app_set_lcd_size () {
 }
 
 findarmgcc() {
-  prefixtools arm-elf-eabi-
+  prefixtools arm-none-eabi-
   gccchoice="9.5.0"
 }
 
