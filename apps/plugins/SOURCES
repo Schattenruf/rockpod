@@ -20,6 +20,7 @@ lastfm_scrobbler.c
 lastfm_scrobbler_viewer.c
 logo.c
 lrcplayer.c
+mahjongg.c
 mosaique.c
 main_menu_config.c
 playing_time.c
