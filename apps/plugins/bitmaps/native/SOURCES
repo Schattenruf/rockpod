@@ -194,6 +194,9 @@ brickmania_powerups.112x64x1.bmp
 /* Jackpot */
 jackpot_slots.30x420x1.bmp
 
+/* Mahjongg */
+mahjongg_tiles.bmp
+
 /* Bubbles */
 #ifdef HAVE_LCD_COLOR
 #if ((LCD_WIDTH >= 640) && (LCD_HEIGHT >= 480)) || \
