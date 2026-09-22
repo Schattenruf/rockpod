@@ -1125,7 +1125,12 @@ void ata_sleepnow(void)
     mutex_lock(&ata_mutex);
 
     ata_flush_cache();
+    /* SD adapters (no PM, e.g. iFlash) may ack FLUSH before the card has
+     * committed; give it time to settle before any power cut. */
+    if (!ceata && !ata_disk_can_sleep())
+        sleep(HZ / 2);
 
+    
     if (ceata) {
         logf("ata SLEEP %ld", current_tick);
         memset(ceata_taskfile, 0, 16);
@@ -1177,6 +1182,22 @@ void ata_spin(void)
     ata_set_active();
 }
 
+/* iFlash adapters report no rotation rate, form factor or TRIM, so the
+ * generic SSD heuristic misses them; match the IDENTIFY model string. */
+static bool ata_is_iflash(void)
+{
+    char model[41];
+    int i;
+
+    for (i = 0; i < 20; i++)
+    {
+        model[2 * i] = identify_info[27 + i] >> 8;
+        model[2 * i + 1] = identify_info[27 + i] & 0xff;
+    }
+    model[40] = '\0';
+    return strstr(model, "iFlash") != NULL;
+}
+
 void ata_set_storage_mode(int mode)
 {
     /* 0=auto, 1=HDD, 2=SSD */
@@ -1185,7 +1206,8 @@ void ata_set_storage_mode(int mode)
     else if (mode == 1)
         ata_ssd_mode = false;
     else /* auto */
-        ata_ssd_mode = ata_disk_isssd();
+        /*ata_ssd_mode = ata_disk_isssd();*/
+        ata_ssd_mode = ata_disk_isssd() || ata_is_iflash();
 }
 
 bool ata_get_ssd_mode(void)
@@ -1218,7 +1240,8 @@ int ata_init(void)
         return rc;
 
     /* Auto-detect SSD before settings are loaded */
-    ata_ssd_mode = ata_disk_isssd();
+    /*ata_ssd_mode = ata_disk_isssd();*/
+    ata_ssd_mode = ata_disk_isssd() || ata_is_iflash();
 
     /* Logical sector size */
     if (ceata)
